@@ -21,9 +21,14 @@ ikb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Расс
                                ,[InlineKeyboardButton(text='Формулы расчёта', callback_data='formulas')]])
 
 # Клава покупки товаров
-buy_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Product1',callback_data='product_buying')]
-    , [InlineKeyboardButton(text='Product2',callback_data='product_buying')]
-    , [InlineKeyboardButton(text='Product3',callback_data='product_buying')]
-    , [InlineKeyboardButton(text='Product4',callback_data='product_buying')]
-])
+# buy_kb = InlineKeyboardMarkup(inline_keyboard=[
+#     [InlineKeyboardButton(text='Product1',callback_data='product_buying')]
+#     , [InlineKeyboardButton(text='Product2',callback_data='product_buying')]
+#     , [InlineKeyboardButton(text='Product3',callback_data='product_buying')]
+#     , [InlineKeyboardButton(text='Product4',callback_data='product_buying')]
+# ])
+buy_kb = InlineKeyboardMarkup()
+buy_kb.insert(InlineKeyboardButton(text='Product1',callback_data='product_buying'))
+buy_kb.insert(InlineKeyboardButton(text='Product2',callback_data='product_buying'))
+buy_kb.insert(InlineKeyboardButton(text='Product3',callback_data='product_buying'))
+buy_kb.insert(InlineKeyboardButton(text='Product4',callback_data='product_buying'))
