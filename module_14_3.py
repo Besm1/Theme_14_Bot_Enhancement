@@ -3,8 +3,9 @@ from aiogram import executor, types
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from bot_connector import dp, bot
-from utils import mifflin_san_geor
+from crud_functions import *
 from keyboards import kb, ikb, buy_kb
+from utils import mifflin_san_geor
 
 is_start_pressed = False
 
@@ -98,11 +99,17 @@ async def bot_info(message):
     ''')
 # Реакция на кнопку/строку "Информация"
 @dp.message_handler(text='Купить')
+# async def get_buying_list(message: aiogram.types.Message):
+#     for number in range(1,5):
+#         with open(f'images\Product{number}.jpg', 'rb') as img:
+#             await message.answer_photo(img, f'Название: Product{number} | Описание: описание {number} '
+#                                             f'| Цена: {number * 100}')
+#     await message.answer(text='Выберите продукт для покупки:', reply_markup=buy_kb)
 async def get_buying_list(message: aiogram.types.Message):
-    for number in range(1,5):
-        with open(f'images\Product{number}.jpg', 'rb') as img:
-            await message.answer_photo(img, f'Название: Product{number} | Описание: описание {number} '
-                                            f'| Цена: {number * 100}')
+    for p_ in products:
+        with open(p_[IMG_FILE], 'rb') as img:
+            await message.answer_photo(img, f'Название: {p_[TITLE]} | Описание: {p_[DESCRIPTION]} '
+                                            f'| Цена: {p_[PRICE]}')
     await message.answer(text='Выберите продукт для покупки:', reply_markup=buy_kb)
 
 
@@ -119,4 +126,6 @@ async def send_confirm_message(call):
     await call.message.answer(text='Вы успешно приобрели продукт!')
 
 if __name__ == '__main__':
+    initiate_db()
+    products = get_all_products()
     executor.start_polling(dp, skip_updates=True)
