@@ -6,6 +6,7 @@ kb = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='Рассчитать калории')]
     , [KeyboardButton(text='Купить')]
     , [KeyboardButton(text='Информация')]
+    , [KeyboardButton(text='Выход')]
  ]
 ,  resize_keyboard=True)
 

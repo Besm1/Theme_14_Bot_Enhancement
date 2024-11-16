@@ -12,6 +12,7 @@ IMG_FILE = 4
 def initiate_db():
     try:
         rows_cnt = cursor.execute('select count(*) from Products').fetchone()
+        rows_cnt = cursor.execute('select count(*) from Users').fetchone()
     except Exception as e:
         cursor.executescript('''
         create table if not exists Products (
@@ -22,7 +23,7 @@ def initiate_db():
             , img_file text
             );
         create table if not exists Users (
-            id int,
+            id INTEGER PRIMARY KEY,
             username text,
             email text,
             age int,
@@ -31,9 +32,8 @@ def initiate_db():
         
         ''')
         connection.commit()
-        rows_cnt = cursor.execute('select count(*) from Products').fetchone()
 
-
+    rows_cnt = cursor.execute('select count(*) from Products').fetchone()
     if not rows_cnt[0]:
         cursor.execute('''
             insert into Products 
@@ -46,6 +46,15 @@ def initiate_db():
         ''')
         connection.commit()
 
+def add_user(user_id, username, email, age):
+    if not is_inserted(username):
+        cursor.execute(f"insert into Users values(?, ?, ?, ?, ?)",
+                       (user_id, username, email, age, 1000))
+    connection.commit()
+
+def is_inserted(username):
+    us = cursor.execute('select * from Users where username = ?', (username,)).fetchone()
+    return True if us else False
 
 def get_all_products():
     return cursor.execute('select * from Products').fetchall()
