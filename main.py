@@ -8,8 +8,11 @@ from crud_functions import *
 from keyboards import kb, ikb, buy_kb
 from utils import mifflin_san_geor
 
-is_start_pressed = False
-u_name = ''
+
+
+############ Глобальные переменные ##############
+is_start_pressed = False    # Флаг "Введена команда /start"
+u_name = ''     # Имя пользователя в Telegram
 
 # Состояния FSM
 class UserState(StatesGroup):
@@ -28,20 +31,20 @@ class RegistrationState(StatesGroup):
 #                                                                    ['start', 'старт']]))
 @dp.message_handler(commands=['start', 'старт'])
 async def start(message: types.Message):
-    global is_start_pressed
+    global is_start_pressed, u_name
     is_start_pressed = True
-    if not is_inserted(message.from_user.username):
+    u_name = message.from_user.username
+    if not is_inserted(u_name):
         kb.keyboard[1][0].text = 'Регистрация'
-        regtxt = "\n(Чтобы купить что-нибудь, надо зарегистрироваться)"
-        # await bot.send_message(message.from_user.id, '',reply_markup=types.ReplyKeyboardRemove())
+        regtxt = "\n(Чтобы купить что-нибудь в нашем магазине, надо зарегистрироваться)" # "Довесок" к тексту приветствия в случае отсутствия регистрации
     else:
         regtxt = ""
-
     await message.answer("Привет! Я Бот, который заботится о твоём здоровье.\n"
                     "Для управления воспользуйся кнопками внизу.\n"
                     "Могу рассчитать твою суточную норму калорий или помочь в покупке товаров для здоровья."
                     + regtxt
                      , reply_markup=kb)
+    u_name = message.from_user.username
 
 ################ Обработчики основной клавиатуры #####################
 
@@ -52,14 +55,54 @@ async def main_menu(message):
 
 
 # ---------- Регистрация или Купить -------------
-@dp.message_handler(lambda message: message.text and any([message.text == txt for txt in ['Регистрация', 'Купить']]))
-async def buy_or_register(message: aiogram.types.Message):
+################ Обработчик покупок ##################
+# ---------- Купить -------------
+@dp.message_handler(text='Купить')
+async def get_buying_list(message: aiogram.types.Message):
+    for p_ in products:
+        with open(p_[IMG_FILE], 'rb') as img:
+            await message.answer_photo(img, f'Название: {p_[TITLE]} | Описание: {p_[DESCRIPTION]} '
+                                            f'| Цена: {p_[PRICE]}')
+    await message.answer(text='Выберите продукт для покупки:', reply_markup=buy_kb)
+
+@dp.callback_query_handler(text='product_buying')
+async def send_confirm_message(call):
+    await call.message.answer(text='Вы успешно приобрели продукт!')
+
+
+
+################ Обработчик регистрации ##################
+# ---------- Регистрация -------------
+@dp.message_handler(text='Регистрация')
+async def sign_up(message: types.Message):
     global u_name
-    u_name = message.from_user.username
-    if message.text == 'Купить':
-        await get_buying_list(message)
-    else:
-        await sign_up(message)
+    await message.answer(f'Регистрация. {u_name}, укажи адрес электронной почты:')
+    await RegistrationState.email.set()
+
+@dp.message_handler(state=RegistrationState.email)
+async def set_email(message: types.Message, state):
+    await state.update_data(email=message.text)
+    await message.answer(text='Укажи свой возраст (лет):')
+    await RegistrationState.age.set()
+
+@dp.message_handler(state=RegistrationState.age)
+async def set_age_reg(message: types.Message, state):
+    global u_name
+    age = None
+    while not age:
+        try:
+            await state.update_data(age=message.text)
+            age = int(message.text)
+        except ValueError as e:
+            await message.answer(text=f'{e}. Введи возраст (целое число лет):')
+            message.text = None
+    data = await state.get_data()
+    add_user(None, u_name, data['email'], data['age'])
+    await state.finish()
+    kb.keyboard[1][0].text = 'Купить'
+    await bot.send_message(message.from_user.id, text='Регистрация завершена.'
+                           , reply_markup=types.ReplyKeyboardRemove())
+    await message.answer(text=f'{u_name}, теперь ты можешь совершать покупки в нашем магазине!', reply_markup=kb)
 
 
 # ---------- Информация -------------
@@ -134,51 +177,7 @@ async def send_calories(message, state):
     await state.finish()
 
 
-################ Обработчик регистрации ##################
-# ---------- Регистрация -------------
-async def sign_up(message: types.Message):
-    global u_name
-    await message.answer(f'Регистрация. {u_name}, укажи адрес электронной почты:')
-    await RegistrationState.email.set()
 
-@dp.message_handler(state=RegistrationState.email)
-async def set_email(message: types.Message, state):
-    await state.update_data(email=message.text)
-    await message.answer(text='Укажи свой возраст (лет):')
-    await RegistrationState.age.set()
-
-@dp.message_handler(state=RegistrationState.age)
-async def set_age_reg(message: types.Message, state):
-    global u_name
-    age = None
-    while not age:
-        try:
-            await state.update_data(age=message.text)
-            age = int(message.text)
-        except ValueError as e:
-            await message.answer(text=f'{e}. Введи возраст (целое число лет):')
-            message.text = None
-    data = await state.get_data()
-    add_user(None, u_name, data['email'], data['age'])
-    await state.finish()
-    kb.keyboard[1][0].text = 'Купить'
-    await bot.send_message(message.from_user.id, text='Регистрация завершена.'
-                           , reply_markup=types.ReplyKeyboardRemove())
-    await message.answer(text=f'{u_name}, теперь ты можешь совершать покупки в нашем магазине!', reply_markup=kb)
-
-
-################ Обработчик покупок ##################
-# ---------- Купить -------------
-async def get_buying_list(message: aiogram.types.Message):
-    for p_ in products:
-        with open(p_[IMG_FILE], 'rb') as img:
-            await message.answer_photo(img, f'Название: {p_[TITLE]} | Описание: {p_[DESCRIPTION]} '
-                                            f'| Цена: {p_[PRICE]}')
-    await message.answer(text='Выберите продукт для покупки:', reply_markup=buy_kb)
-
-@dp.callback_query_handler(text='product_buying')
-async def send_confirm_message(call):
-    await call.message.answer(text='Вы успешно приобрели продукт!')
 
 
 
