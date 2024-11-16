@@ -162,9 +162,9 @@ async def set_age_reg(message: types.Message, state):
     add_user(None, u_name, data['email'], data['age'])
     await state.finish()
     kb.keyboard[1][0].text = 'Купить'
-    await bot.send_message(message.from_user.id, text='Отлично!'
+    await bot.send_message(message.from_user.id, text='Регистрация завершена.'
                            , reply_markup=types.ReplyKeyboardRemove())
-    await message.answer(text=f'{u_name}, ты успешно зарегистрирован, можешь совершать покупки!', reply_markup=kb)
+    await message.answer(text=f'{u_name}, теперь ты можешь совершать покупки в нашем магазине!', reply_markup=kb)
 
 
 ################ Обработчик покупок ##################
