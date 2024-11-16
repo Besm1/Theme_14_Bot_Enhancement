@@ -13,14 +13,22 @@ def initiate_db():
     try:
         rows_cnt = cursor.execute('select count(*) from Products').fetchone()
     except Exception as e:
-        cursor.execute('''
+        cursor.executescript('''
         create table if not exists Products (
-        id INTEGER PRIMARY KEY
-        , title text not null
-        , description text
-        , price int not null
-        , img_file text
-        );
+            id INTEGER PRIMARY KEY
+            , title text not null
+            , description text
+            , price int not null
+            , img_file text
+            );
+        create table if not exists Users (
+            id int,
+            username text,
+            email text,
+            age int,
+            balance int
+            );
+        
         ''')
         connection.commit()
         rows_cnt = cursor.execute('select count(*) from Products').fetchone()
