@@ -10,6 +10,16 @@ kb = ReplyKeyboardMarkup(keyboard=[
  ]
 ,  resize_keyboard=True)
 
+KB_REGISTERED = ['Рассчитать калории', 'Купить', 'Информация', 'Выход']
+KB_UNREGISTERED = ['Рассчитать калории', 'Регистрация', 'Информация', 'Выход']
+
+def build_kb(menu_list) -> ReplyKeyboardMarkup:
+    kb = ReplyKeyboardMarkup(resize_keyboard=True)
+    for el in menu_list:
+        kb.add(KeyboardButton(text=el))
+    return kb
+
+
 # btn_calculate = KeyboardButton(text='Рассчитать')
 # btn_info = KeyboardButton(text='Информация')
 # kb.add(btn_calculate)
