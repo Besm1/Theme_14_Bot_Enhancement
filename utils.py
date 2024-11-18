@@ -1,5 +1,5 @@
 from aiogram.types import Message
-from crud_functions import get_user_info, U_USERNAME, U_FIRST_NAME, U_LAST_NAME, is_inserted
+from crud_functions import get_user_info, U_USERNAME, U_FIRST_NAME, U_LAST_NAME, user_exists
 
 
 async def mifflin_san_geor(age, growth, weight, gender):
@@ -40,6 +40,6 @@ async def check_username(text:str):
     # if not all([c_ == '_' or ord('a') <= ord(c_.lower()) <= ord('z') or c_.isdigit() for c_ in text]):
     if not text.isidentifier():
         ret = 'Имя должно содержать только латинские буквы, цифры и "_"'
-    if is_inserted(text):
+    if user_exists(text):
         ret = f'Имя пользователя "{text}" занято.'
     return ret

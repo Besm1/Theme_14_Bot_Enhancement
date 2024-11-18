@@ -176,14 +176,20 @@ async def set_age(call):
 
 
 @dp.message_handler(state=UserState.age)
-async def set_growth(message, state):
+async def set_weight(message:types.Message, state):
+    if not message.text.isnumeric() or int(message.text) <= 0:
+        await message.answer(f'Введи свой возраст - положительное число:')
+        return
     await state.update_data(age=message.text)
     await message.answer(f'Введи свой рост (см)')
     await UserState.growth.set()
 
 
 @dp.message_handler(state=UserState.growth)
-async def set_weight(message, state):
+async def set_growth(message, state):
+    if not message.text.isnumeric() or int(message.text) <= 100:
+        await message.answer(f'Введи свой рост (> 100):')
+        return
     await state.update_data(growth=message.text)
     await message.answer(f'Введи свой вес (кг)')
     await UserState.weight.set()
@@ -191,13 +197,20 @@ async def set_weight(message, state):
 
 @dp.message_handler(state=UserState.weight)
 async def send_calories(message, state):
+    if not message.text.isnumeric() or int(message.text) <= 20:
+        await message.answer(f'Введи свой вес (> 20):')
+        return
     await state.update_data(weight=message.text)
     await message.answer(f'Ты мужчина или женщина?')
     await UserState.gender.set()
 
 
 @dp.message_handler(state=UserState.gender)
-async def send_calories(message, state):
+async def send_calories(message:types.Message, state):
+    if not message.text.lower() in ['мужчина'[0:(len(message.text) if len(message.text) <= len('мужчина') else len('мужчина'))]
+    , 'женщина'[0:(len(message.text) if len(message.text) <= len('женщина') else len('женщина'))]]:
+        await message.answer(f'Введи свой вес (> 20):')
+        return
     await state.update_data(gender=message.text)
     data = await state.get_data()
     await message.answer(f'Твоя норма калорий =  {await mifflin_san_geor(**data)}.\n\n')

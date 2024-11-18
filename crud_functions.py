@@ -108,4 +108,6 @@ def register_user(user_id, username, email, age):
                    (username, email, age, 1, 1000, user_id))
     connection.commit()
 
+def user_exists(u_id) -> bool:
+    return cursor.execute("select count(*) from Users where id = ?", (u_id,)).fetchone()[0]
 
