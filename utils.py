@@ -37,7 +37,8 @@ async def get_user_name(message:Message):
 
 async def check_username(text:str):
     ret = None
-    if not all([c_ == '_' or ord('a') <= ord(c_.lower()) <= ord('z') or c_.isdigit() for c_ in text]):
+    # if not all([c_ == '_' or ord('a') <= ord(c_.lower()) <= ord('z') or c_.isdigit() for c_ in text]):
+    if not text.isidentifier():
         ret = 'Имя должно содержать только латинские буквы, цифры и "_"'
     if is_inserted(text):
         ret = f'Имя пользователя "{text}" занято.'
