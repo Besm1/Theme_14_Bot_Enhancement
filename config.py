@@ -1,0 +1,1 @@
+BOT_API_TOKEN = '7881922196:AAFY_Aij-5ug3ec7n-Xms_Nsitv0B68t9v0'

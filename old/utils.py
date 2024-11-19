@@ -1,6 +1,5 @@
-from aiogram import types
 from aiogram.types import Message
-from crud_functions import get_user_info, U_USERNAME, U_FIRST_NAME, U_LAST_NAME, user_exists, is_logged_in
+from crud_functions import get_user_info, U_USERNAME, U_FIRST_NAME, U_LAST_NAME, is_inserted
 
 
 async def mifflin_san_geor(age, growth, weight, gender):
@@ -39,16 +38,8 @@ async def get_user_name(message:Message):
 async def check_username(text:str):
     ret = None
     # if not all([c_ == '_' or ord('a') <= ord(c_.lower()) <= ord('z') or c_.isdigit() for c_ in text]):
-    if not text.replace('_', '').isalnum():
+    if not text.isidentifier():
         ret = 'Имя должно содержать только латинские буквы, цифры и "_"'
-    elif user_exists(text):
+    if is_inserted(text):
         ret = f'Имя пользователя "{text}" занято.'
     return ret
-
-
-async def all_messages(message):
-    if is_logged_in(message.from_id):
-        await message.answer(f'"{message.text}" не является командой.\nБот управляется кнопками.>')
-    else:
-        await message.answer('Введи команду /start, чтобы начать общение.', reply_markup=types.ReplyKeyboardRemove())
-
